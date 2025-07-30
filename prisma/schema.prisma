@@ -1,0 +1,65 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   // "owner"
+  createdAt DateTime @default(now())
+}
+
+model Student {
+  id                Int      @id @default(autoincrement())
+  studentName       String
+  parentName        String
+  parentEmail       String   @unique
+  password          String
+  standard          String
+  medium            String
+  schoolName        String
+  lastStandardMarks String?
+  schoolTiming      String?
+  batchId           Int?
+  contactNumber     String
+  address           String?
+  Batch             Batch?   @relation(fields: [batchId], references: [id])
+}
+
+model Batch {
+  id        Int        @id @default(autoincrement())
+  name      String
+  startTime String
+  endTime   String
+  students  Student[]
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  batchId   Int?
+  studentId Int?
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model Timetable {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  day       String
+  subjects  String   // JSON string
+}
+
+model Fee {
+  id             Int      @id @default(autoincrement())
+  studentId      Int
+  totalFee       Int
+  paidAmount     Int
+  lastPaymentDate DateTime?
+}
