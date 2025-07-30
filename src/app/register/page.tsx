@@ -39,7 +39,7 @@ export default function RegisterPage() {
         background: "#f5f5f5",
       }}
     >
-      <Card className="auth-card">
+      <Card className="auth-card" style={{ width: 400, padding: 24 }}>
         <div
           style={{
             display: "flex",
@@ -59,7 +59,7 @@ export default function RegisterPage() {
           </h2>
         </div>
 
-        <Title level={3} className="auth-title">
+        <Title level={3} className="auth-title" style={{ textAlign: "center", marginBottom: 24, color: "#132454ff" }}>
           Parent Registration
         </Title>
 
@@ -102,6 +102,7 @@ export default function RegisterPage() {
             block
             loading={loading}
             className="auth-button"
+            style={{ background: "#132454ff" }}
           >
             Register
           </Button>
