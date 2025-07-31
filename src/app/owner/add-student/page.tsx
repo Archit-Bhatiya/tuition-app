@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Form, Input, Button, Card, Select, message } from "antd";
 import { useRouter } from "next/navigation";
 
@@ -7,14 +7,28 @@ const { Option } = Select;
 
 export default function AddStudentPage() {
   const [loading, setLoading] = useState(false);
+  const [batches, setBatches] = useState<any[]>([]);
   const router = useRouter();
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    async function fetchBatches() {
+      const res = await fetch("/api/batches");
+      const data = await res.json();
+      setBatches(data);
+    }
+    fetchBatches();
+  }, []);
 
   const onFinish = async (values: any) => {
     setLoading(true);
     const res = await fetch("/api/students/add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
+      body: JSON.stringify({
+        ...values,
+        batchIds: values.batchIds || [], // send array of batch IDs
+      }),
     });
     const data = await res.json();
     setLoading(false);
@@ -25,13 +39,21 @@ export default function AddStudentPage() {
     }
 
     message.success("Student added successfully!");
-    router.push("/owner/dashboard");
+    form.resetFields();
   };
 
   return (
-    <div style={{ padding: 24, display: "flex", justifyContent: "center" }}>
+    <div style={{ padding: 24, display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <Button
+        type="default"
+        onClick={() => router.push("/owner/dashboard")}
+        style={{ marginBottom: 16 }}
+      >
+        ← Back to Dashboard
+      </Button>
+
       <Card title="Add Student" style={{ maxWidth: 600, width: "100%" }}>
-        <Form layout="vertical" onFinish={onFinish}>
+        <Form layout="vertical" onFinish={onFinish} form={form}>
           <Form.Item name="studentName" label="Student Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
@@ -63,6 +85,22 @@ export default function AddStudentPage() {
           <Form.Item name="schoolTiming" label="School Timing">
             <Input />
           </Form.Item>
+
+          {/* Multi-select batches */}
+          <Form.Item name="batchIds" label="Assign Batches">
+            <Select
+              mode="multiple"
+              placeholder="Select one or more batches"
+              allowClear
+            >
+              {batches.map((batch) => (
+                <Option key={batch.id} value={batch.id}>
+                  {batch.name} ({batch.startTime} - {batch.endTime})
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
           <Form.Item name="contactNumber" label="Contact Number" rules={[{ required: true }]}>
             <Input />
           </Form.Item>

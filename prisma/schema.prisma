@@ -27,10 +27,11 @@ model Student {
   schoolName        String
   lastStandardMarks String?
   schoolTiming      String?
-  batchId           Int?
   contactNumber     String
   address           String?
-  Batch             Batch?   @relation(fields: [batchId], references: [id])
+  
+  batches           StudentBatch[]   // Many to Many relation
+           
 }
 
 model Batch {
@@ -38,7 +39,7 @@ model Batch {
   name      String
   startTime String
   endTime   String
-  students  Student[]
+  students  StudentBatch[]   // Many to Many relation
 }
 
 model Message {
@@ -62,4 +63,13 @@ model Fee {
   totalFee       Int
   paidAmount     Int
   lastPaymentDate DateTime?
+}
+
+model StudentBatch {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  batchId   Int
+
+  Student   Student  @relation(fields: [studentId], references: [id])
+  Batch     Batch    @relation(fields: [batchId], references: [id])
 }

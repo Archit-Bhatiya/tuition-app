@@ -25,6 +25,21 @@ export default function OwnerDashboard() {
     // For now keeping null to show placeholders
   }, [router]);
 
+  {
+    /**  Route mapping for sidebar keys */
+  }
+  {
+    /** You can add more routes here easily */
+  }
+  const routesMap: Record<string, string> = {
+    "1": "/owner/dashboard",
+    "2": "/owner/add-student",
+    "3": "/owner/batches",
+    "4": "/owner/assign-batches",
+    "5": "/owner/fees",
+    "6": "/owner/timetable",
+  };
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       {/* Sidebar */}
@@ -40,18 +55,20 @@ export default function OwnerDashboard() {
         >
           Universal Classes
         </div>
+
         <Menu
           theme="dark"
           mode="inline"
           style={{ background: "#132454ff" }}
           onClick={({ key }) => {
-            if (key === "2") router.push("/owner/add-student")
+            const path = routesMap[key];
+            if (path) router.push(path);
           }}
           items={[
             { key: "1", label: "Dashboard" },
             { key: "2", label: "Add Students" },
             { key: "3", label: "Batches" },
-            { key: "4", label: "Messages" },
+            { key: "4", label: "Assign Batches" },
             { key: "5", label: "Fees" },
             { key: "6", label: "Timetable" },
           ]}

@@ -15,15 +15,15 @@ export async function POST(req: Request) {
       schoolName,
       lastStandardMarks,
       schoolTiming,
-      batchId,
       contactNumber,
       address,
+      batchIds = [],
     } = body;
 
-    // ✅ Hash parent password
+    // Hash parent password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ Create Student with Parent info
+    // Create Student with Parent info
     const student = await prisma.student.create({
       data: {
         studentName,
@@ -35,15 +35,36 @@ export async function POST(req: Request) {
         schoolName,
         lastStandardMarks,
         schoolTiming,
-        batchId: batchId || null,
         contactNumber,
         address,
       },
     });
 
-    return NextResponse.json({ message: "Student added successfully", student });
+    // Link batches manually via StudentBatch table
+    if (batchIds.length > 0) {
+      await prisma.studentBatch.createMany({
+        data: batchIds.map((batchId: number) => ({
+          studentId: student.id,
+          batchId,
+        })),
+      });
+    }
+
+    // Return with linked batches
+    const studentWithBatches = await prisma.student.findUnique({
+      where: { id: student.id },
+      include: { batches: true },
+    });
+
+    return NextResponse.json({
+      message: "Student added successfully",
+      student,
+    });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Failed to add student" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to add student" },
+      { status: 500 }
+    );
   }
 }
