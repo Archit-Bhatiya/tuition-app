@@ -1,60 +1,69 @@
 "use client";
-import { Table, Button, Card } from "antd";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Table, Button, Spin, message } from "antd";
+import { text } from "stream/consumers";
 
 interface Student {
   id: number;
   studentName: string;
   parentName: string;
-  standard: string;
+  standard: string | null;
 }
 
-export default function AssignBatchList() {
+export default function AssignBatchesPage() {
+  const router = useRouter();
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     async function fetchStudents() {
-      const res = await fetch("/api/students");
-      const data = await res.json();
-      setStudents(data.students || []);
-      setLoading(false);
+      try {
+        const res = await fetch("/api/students");
+        const data = await res.json();
+        setStudents(data.students || []);
+      } catch (err) {
+        console.error(err);
+        message.error("Failed to load students");
+      } finally {
+        setLoading(false);
+      }
     }
     fetchStudents();
   }, []);
 
-  const columns = [
-    { title: "Student Name", dataIndex: "studentName", key: "studentName" },
-    { title: "Parent Name", dataIndex: "parentName", key: "parentName" },
-    { title: "Standard", dataIndex: "standard", key: "standard" },
-    {
-      title: "Action",
-      key: "action",
-      render: (_: any, record: Student) => (
-        <Button
-          type="primary"
-          style={{ background: "#132454ff" }}
-          onClick={() => router.push(`/owner/assign-batches/${record.id}`)}
-        >
-          Assign
-        </Button>
-      ),
-    },
-  ];
+  if (loading) {
+    return (
+      <div style={{ padding: 24, textAlign: "center" }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: 24 }}>
-      <Card title="Assign Batches to Students">
-        <Table
-          dataSource={students}
-          columns={columns}
-          loading={loading}
-          rowKey="id"
-          pagination={{ pageSize: 5 }}
-        />
-      </Card>
+      <h2>Assign Batches to Students</h2>
+
+      <Table
+        dataSource={students}
+        rowKey="id"
+        columns={[
+          { title: "Student Name", dataIndex: "studentName" },
+          { title: "Parent Name", dataIndex: "parentName" },
+          { title: "Standard", dataIndex: "standardName", render: (text) => text || "N/A", },
+          {
+            title: "Action",
+            render: (_, student) => (
+              <Button
+                type="primary"
+                onClick={() => router.push(`/owner/assign-batches/${student.id}`)}
+              >
+                Assign
+              </Button>
+            ),
+          },
+        ]}
+      />
     </div>
   );
 }

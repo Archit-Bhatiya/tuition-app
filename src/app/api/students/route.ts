@@ -4,14 +4,22 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   try {
     const students = await prisma.student.findMany({
-      select: {
-        id: true,
-        studentName: true,
-        parentName: true,
-        standard: true,
-      },
+      include: {
+        standard: {   // include relation
+          select: { name: true }
+        }
+      }
     });
-    return NextResponse.json({ students });
+
+    // Format data for frontend
+    const formatted = students.map(student => ({
+      id: student.id,
+      studentName: student.studentName,
+      parentName: student.parentName,
+      standardName: student.standard?.name || null
+    }));
+
+    return NextResponse.json({ students: formatted });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Failed to fetch students" }, { status: 500 });

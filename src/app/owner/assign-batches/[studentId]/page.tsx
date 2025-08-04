@@ -26,12 +26,12 @@ export default function AssignBatchesToStudent() {
         // Fetch all batches
         const batchRes = await fetch("/api/batches");
         const batchData = await batchRes.json();
+        console.log("Batches response: ", batchData);
+        setBatches(batchData.batches || batchData || []);
 
-        // Fetch student's assigned batches
+        // Fetch student's assigned batch IDs
         const assignedRes = await fetch(`/api/students/${studentId}/batches`);
         const assignedData = await assignedRes.json();
-
-        setBatches(batchData.batches || []);
         setSelectedBatchIds(assignedData.batchIds || []);
       } catch (err) {
         console.error(err);
@@ -51,9 +51,12 @@ export default function AssignBatchesToStudent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ batchIds: selectedBatchIds }),
       });
+
       if (res.ok) {
-        message.success("Batches updated successfully");
-        router.push("/owner/assign-batches");
+        message.success("Batches updated successfully", 1.5);
+        setTimeout(() => {
+          router.push("/owner/assign-batches");
+        }, 1500);
       } else {
         const data = await res.json();
         message.error(data.error || "Failed to update batches");

@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       parentName,
       parentEmail,
       password,
-      standard,
+      standardId,
       medium,
       schoolName,
       lastStandardMarks,
@@ -20,6 +20,9 @@ export async function POST(req: Request) {
       batchIds = [],
     } = body;
 
+    if (!standardId) {
+      return NextResponse.json({ error: "Standard is required" }, { status: 400 });
+    }
     // Hash parent password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -30,7 +33,7 @@ export async function POST(req: Request) {
         parentName,
         parentEmail,
         password: hashedPassword,
-        standard,
+        standardId,
         medium,
         schoolName,
         lastStandardMarks,

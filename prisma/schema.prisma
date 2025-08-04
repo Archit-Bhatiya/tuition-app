@@ -1,10 +1,10 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 model User {
@@ -12,7 +12,7 @@ model User {
   name      String
   email     String   @unique
   password  String
-  role      String   // "owner"
+  role      String
   createdAt DateTime @default(now())
 }
 
@@ -22,24 +22,25 @@ model Student {
   parentName        String
   parentEmail       String   @unique
   password          String
-  standard          String
   medium            String
   schoolName        String
   lastStandardMarks String?
   schoolTiming      String?
   contactNumber     String
   address           String?
-  
+
+  standardId        Int
+  standard          Standard @relation(fields: [standardId], references: [id])
+
   batches           StudentBatch[]   // Many to Many relation
-           
 }
 
 model Batch {
-  id        Int        @id @default(autoincrement())
+  id        Int            @id @default(autoincrement())
   name      String
   startTime String
   endTime   String
-  students  StudentBatch[]   // Many to Many relation
+  students  StudentBatch[]
 }
 
 model Message {
@@ -50,26 +51,46 @@ model Message {
   createdAt DateTime @default(now())
 }
 
-model Timetable {
-  id        Int      @id @default(autoincrement())
-  studentId Int
-  day       String
-  subjects  String   // JSON string
-}
-
 model Fee {
-  id             Int      @id @default(autoincrement())
-  studentId      Int
-  totalFee       Int
-  paidAmount     Int
+  id              Int       @id @default(autoincrement())
+  studentId       Int
+  totalFee        Int
+  paidAmount      Int
   lastPaymentDate DateTime?
 }
 
 model StudentBatch {
-  id        Int      @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   studentId Int
   batchId   Int
+  Batch     Batch   @relation(fields: [batchId], references: [id])
+  Student   Student @relation(fields: [studentId], references: [id])
+}
 
-  Student   Student  @relation(fields: [studentId], references: [id])
-  Batch     Batch    @relation(fields: [batchId], references: [id])
+model Standard {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  createdAt DateTime   @default(now())
+
+  students   Student[]
+  timetables Timetable[]
+}
+
+model Subject {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  timetables Timetable[]
+}
+
+model Timetable {
+  id         Int        @id @default(autoincrement())
+  day        String
+  standardId Int
+  subjectId  Int
+  createdAt  DateTime   @default(now())
+
+  standard   Standard   @relation(fields: [standardId], references: [id])
+  subject    Subject    @relation(fields: [subjectId], references: [id])
 }

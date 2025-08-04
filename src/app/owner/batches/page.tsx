@@ -69,14 +69,6 @@ export default function BatchesPage() {
 
   return (
     <div style={{ padding: 24 }}>
-      <Button
-        type="default"
-        onClick={() => router.push("/owner/dashboard")}
-        style={{ marginBottom: 16 }}
-      >
-        ← Back to Dashboard
-      </Button>
-
       <Card
         title="Manage Batches"
         extra={

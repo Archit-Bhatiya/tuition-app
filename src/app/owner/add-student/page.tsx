@@ -5,11 +5,17 @@ import { useRouter } from "next/navigation";
 
 const { Option } = Select;
 
+interface Standard {
+  id: number;
+  name: string;
+}
+
 export default function AddStudentPage() {
   const [loading, setLoading] = useState(false);
   const [batches, setBatches] = useState<any[]>([]);
   const router = useRouter();
   const [form] = Form.useForm();
+  const [standards, setStandards] = useState<Standard[]>([]);
 
   useEffect(() => {
     async function fetchBatches() {
@@ -17,6 +23,14 @@ export default function AddStudentPage() {
       const data = await res.json();
       setBatches(data);
     }
+
+    async function fetchStandards() {
+      const res = await fetch("/api/standards");
+      const data = await res.json();
+      setStandards(data);
+    }
+
+    fetchStandards();
     fetchBatches();
   }, []);
 
@@ -43,15 +57,7 @@ export default function AddStudentPage() {
   };
 
   return (
-    <div style={{ padding: 24, display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <Button
-        type="default"
-        onClick={() => router.push("/owner/dashboard")}
-        style={{ marginBottom: 16 }}
-      >
-        ← Back to Dashboard
-      </Button>
-
+    <div style={{ padding: 24, display: "flex", flexDirection: "column", alignItems: "center" }}> 
       <Card title="Add Student" style={{ maxWidth: 600, width: "100%" }}>
         <Form layout="vertical" onFinish={onFinish} form={form}>
           <Form.Item name="studentName" label="Student Name" rules={[{ required: true }]}>
@@ -66,8 +72,14 @@ export default function AddStudentPage() {
           <Form.Item name="password" label="Parent Password" rules={[{ required: true }]}>
             <Input.Password />
           </Form.Item>
-          <Form.Item name="standard" label="Standard" rules={[{ required: true }]}>
-            <Input />
+          <Form.Item name="standardId" label="Standard" rules={[{ required: true }]}>
+            <Select placeholder="Select a Standard">
+              {standards.map((std) => (
+                <Option key={std.id} value={std.id}>
+                  {std.name}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
           <Form.Item name="medium" label="Medium" rules={[{ required: true }]}>
             <Select>
